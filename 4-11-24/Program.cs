@@ -25,7 +25,6 @@ while(repeatGame)
     //info ke hře
     Console.WriteLine($"Čas hry: {(DateTime.Now - timer).ToString("hh':'mm':'ss")}");
     Console.WriteLine($"Počet min: {PocetMin} | Zavlajkovaných polí: {LokaceVlajek.Count}\n");
-    Console.WriteLine("pocet tahu: "+TahyHrace.Count);
 
     DrawGame(VelikostPole);
     Console.WriteLine("\nZadej další souřadnice (formát: X Y[F]) (pro pomoc s příkazy zadej: help):");
