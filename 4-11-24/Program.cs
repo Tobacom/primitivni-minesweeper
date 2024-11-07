@@ -23,7 +23,7 @@ while(repeatGame)
 {
     Console.Clear();
     //info ke hře
-    Console.WriteLine($"Čas hry: {(DateTime.Now - timer).ToString("hh':'mm':'ss")}");
+    Console.WriteLine($"Čas hry: {getFormatedTimer()}");
     Console.WriteLine($"Počet min: {PocetMin} | Zavlajkovaných polí: {LokaceVlajek.Count}\n");
 
     DrawGame(VelikostPole);
@@ -35,15 +35,7 @@ while(repeatGame)
     }
 
     //VÝHRA HRY
-    if (Math.Pow(VelikostPole, 2) == TahyHrace.Count + PocetMin)
-    {
-        Console.Clear();
-        Console.WriteLine($"GRATULUJI, VYHRÁL JSI!\nDohráno za: {(DateTime.Now - timer).ToString("hh':'mm':'ss")}\n");
-        DrawGame(VelikostPole);
-
-        Console.ReadLine();
-        repeatGame = false;
-    }
+    if (Math.Pow(VelikostPole, 2) == TahyHrace.Count + PocetMin) GameWin();
 }
 
 
@@ -55,7 +47,7 @@ void DrawGame(int velikostPole, KeyValuePair<int, int>? naslaplaMina = null)
     for (int y = -1; y <= velikostPole; y++)
     {
         if (y == -1) Console.Write("Y X".PadLeft(HlavickaXPad)+"| ");
-        else if (y == 0) Console.Write("‾".PadRight(HlavickaXPad)+"|-");
+        else if (y == 0) Console.Write("‾".PadRight(HlavickaXPad)+"+-");
         else Console.Write($"{y}".PadRight(HlavickaXPad)+"| ");
 
         for (int x = 1; x <= velikostPole; x++)
@@ -128,12 +120,7 @@ bool MakeTurn(string? input)
         if (LokaceMin.Contains(newCords))
         {
             //PROHRA HRY
-            Console.Clear();
-            Console.WriteLine($"PROHRÁL JSI! Šlápl jsi na minu!\nPokus trval: {(DateTime.Now - timer).ToString("hh':'mm':'ss")}\n");
-            DrawGame(VelikostPole, newCords);
-            Console.ReadLine();
-
-            repeatGame = false;
+            GameLose(newCords);
             return true;
         }
         else if (TahyHrace.Contains(newCords)) return true;
@@ -152,6 +139,42 @@ bool MakeTurn(string? input)
         Console.WriteLine("Stiskni libovolnou klávesu pro návrat...");
 
         Console.ReadLine();
+        return true;
+    }
+    //DEBUG opts
+    else if (input.Trim() == "/debug showmines")
+    {
+        Console.Clear();
+
+        Console.WriteLine("DEBUG: lokace min\n");
+        DrawGame(VelikostPole, new(0, 0));
+        Console.WriteLine("\nStiskni libovolnou klávesu pro návrat...");
+
+        Console.ReadLine();
+        return true;
+    }
+    else if (input.Trim() == "/debug makesingle")
+    {
+        for (int y = 1; y <= VelikostPole; y++)
+        {
+            for (int x = 1; x <= VelikostPole; x++)
+            {
+                if (TahyHrace.Contains(new(x, y)) || LokaceVlajek.Contains(new(x, y))) continue;
+                else if (!LokaceVlajek.Contains(new(x, y)) && LokaceMin.Contains(new(x, y))) LokaceVlajek.Add(new(x, y));
+                else TahyHrace.Add(new(x, y));
+            }
+        }
+        TahyHrace.RemoveAt(new Random().Next(0, TahyHrace.Count));
+        return true;
+    }
+    else if (input.Trim() == "/debug makewin")
+    {
+        GameWin();
+        return true;
+    }
+    else if (input.Trim() == "/debug makelose")
+    {
+        GameLose(LokaceMin.Single());
         return true;
     }
 
@@ -207,4 +230,24 @@ List<KeyValuePair<int, int>> GenMines(int pocet, int velikostPole)
     }
 
     return lokaceMin;
+}
+
+string getFormatedTimer() => (DateTime.Now - timer).ToString("hh':'mm':'ss");
+void GameWin()
+{
+    Console.Clear();
+    Console.WriteLine($"GRATULUJI, VYHRÁL JSI!\nDohráno za: {getFormatedTimer()}\n");
+    DrawGame(VelikostPole);
+
+    Console.ReadLine();
+    repeatGame = false;
+}
+void GameLose(KeyValuePair<int, int> naslaplaMina)
+{
+    Console.Clear();
+    Console.WriteLine($"PROHRÁL JSI! Šlápl jsi na minu!\nPokus trval: {(DateTime.Now - timer).ToString("hh':'mm':'ss")}\n");
+    DrawGame(VelikostPole, naslaplaMina);
+    Console.ReadLine();
+
+    repeatGame = false;
 }
